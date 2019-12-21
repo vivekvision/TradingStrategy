@@ -1,4 +1,4 @@
-# Fianl Trading Model
+# Short-term trading model for Liquid Asian Equity Index Futures using Hurst Exponent
 
 Framework used for back-testing : https://gbeced.github.io/pyalgotrade/
 
