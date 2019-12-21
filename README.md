@@ -1,2 +1,2 @@
-# TradingStrategy
+# Fianl Trading Model
  
