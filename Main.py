@@ -25,20 +25,25 @@ register_matplotlib_converters()
 import StrategyUtil
 
 def main(plot):
-    # Load the bar feed from the CSV file
+    # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    instrument = "n225"
-    feed.addBarsFromCSV(instrument, r".\n225.csv")
+    # instrument = "n225"
+    # feed.addBarsFromCSV(instrument, r".\n225.csv")
 
-    #instrument = "hsi"
-    #feed.addBarsFromCSV(instrument, r".\hsi.csv")
+    # instrument = "hsi"
+    # feed.addBarsFromCSV(instrument, r".\hsi.csv")
+
+    instrument = "twii"
+    feed.addBarsFromCSV(instrument, r".\twii.csv")
 
     calibratedStdMultiplier = 0.5
     calibratedShortMomentumPeriod = 12
     calibratedLongMomentumPeriod = 26
     hurstPeriod = 120
-    strat = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, calibratedStdMultiplier, calibratedShortMomentumPeriod,calibratedLongMomentumPeriod)
+    strat = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, calibratedStdMultiplier, calibratedShortMomentumPeriod, calibratedLongMomentumPeriod)
+
+    #Attach a Sharpe Ratio analyser
     sharpeRatioAnalyzer = sharpe.SharpeRatio()
     strat.attachAnalyzer(sharpeRatioAnalyzer)
 
@@ -46,7 +51,7 @@ def main(plot):
     drawdownAnalyzer = drawdown.DrawDown()
     strat.attachAnalyzer(drawdownAnalyzer)
 
-    # Attach a returns analyzers to the strategy.
+    # Attach a return analyzer
     returnsAnalyzer = returns.Returns()
     strat.attachAnalyzer(returnsAnalyzer)
 
