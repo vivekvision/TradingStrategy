@@ -100,7 +100,7 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
                     elif close > upperBBands and currentPos > 0:
                         self.sell(bars)
 
-                if hurst > 0.5:
+                if hurst >= 0.5:
                     if cross.cross_above(macdLine, signalLine) > 0:
                         self.buy(bars)
 
