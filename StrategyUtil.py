@@ -25,26 +25,27 @@ register_matplotlib_converters()
 
 
 class ComprehensiveStrategy(strategy.BacktestingStrategy):
-    def __init__(self, feed, instrument, hurstPeriod, calibratedStdMultiplier, calibratedShortMomentumPeriod, calibratedLongMomentumPeriod):
+    def __init__(self, feed, instrument, hurstPeriod, macdShorterPeriod, macdLongerPeriod, macdSignalPeriod, bollingerBandsPeriod, bollingerBandsNoOfStd):
         strategy.BacktestingStrategy.__init__(self, feed)
-        self.__longerMomentumPeriod =  calibratedLongMomentumPeriod
-        self.__shortMomentumPeriod = calibratedShortMomentumPeriod
+
         self.__instrument = instrument
         self.__hurstPeriod = hurstPeriod
-        self.__calibratedStdMultiplier = calibratedStdMultiplier
-        self.__position = None
+
+        self.__macdShorterPeriod = macdShorterPeriod
+        self.__macdLongerPeriod = macdLongerPeriod
+        self.__macdSignalPeriod = macdSignalPeriod
+        self.__macd = macd.MACD(feed[instrument].getCloseDataSeries(), self.__macdShorterPeriod, self.__macdLongerPeriod, self.__macdSignalPeriod)
+
         # Use adjusted close values instead of regular close values.
         self.setUseAdjustedValues(True)
         self.__adjClosePrices = feed[instrument].getAdjCloseDataSeries()
         self.__prices = feed[instrument].getPriceDataSeries()
         self.__hurst = hurst.HurstExponent(self.__adjClosePrices, hurstPeriod)
 
+        self.__bollingerBandsPeriod = bollingerBandsPeriod
+        self.__bollingerBandsNoOfStd = bollingerBandsNoOfStd
+        self.__bollingerBands = bollinger.BollingerBands(feed[instrument].getCloseDataSeries(), self.__bollingerBandsPeriod, self.__bollingerBandsNoOfStd)
 
-        self.__longerEMA = ma.EMA(self.__prices, self.__longerMomentumPeriod)
-        self.__shorterEMA = ma.EMA(self.__prices, self.__shortMomentumPeriod)
-        self.__bollingerBandsPeriod = 30
-        self.__bollingerBands = bollinger.BollingerBands(feed[instrument].getCloseDataSeries(), self.__bollingerBandsPeriod, 2)
-        self.__macd = macd.MACD(feed[instrument].getCloseDataSeries(),9,16,6)
 
     def getHurst(self):
         return self.__hurst
@@ -75,12 +76,10 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
         self.marketOrder(self.__instrument, size)
 
     def onBars(self, bars):
-        #self.__halfLifeHelper.update()
+
         if bars.getBar(self.__instrument):
             hurst = self.getHurstValue()
-            #halfLife = self.__halfLifeHelper.getHalfLife()
-            #stdDev = self.__halfLifeHelper.getStdDev()
-            #ma = self.__halfLifeHelper.getSma()
+
             bar = bars[self.__instrument]
             open = bar.getOpen()
             close = bar.getAdjClose()
