@@ -35,7 +35,7 @@ def main(plot):
     # feed.addBarsFromCSV(instrument, r".\hsi.csv")
 
     instrument = "twii"
-    feed.addBarsFromCSV(instrument, r".\twii.csv")
+    feed.addBarsFromCSV(instrument, r".\tsec.csv")
 
     calibratedStdMultiplier = 0.5
     calibratedShortMomentumPeriod = 12
