@@ -1,6 +1,3 @@
-from pyalgotrade import strategy
-from pyalgotrade.technical import hurst
-from pyalgotrade.barfeed import quandlfeed
 from pyalgotrade import plotter
 
 from pyalgotrade.stratanalyzer import sharpe
@@ -9,17 +6,6 @@ from pyalgotrade.stratanalyzer import drawdown
 from pyalgotrade.stratanalyzer import trades
 
 from pyalgotrade.barfeed import yahoofeed
-from pyalgotrade import dataseries
-from pyalgotrade.dataseries import aligned
-from pyalgotrade import eventprofiler
-from pyalgotrade.technical import stats
-from pyalgotrade.technical import roc
-from pyalgotrade.technical import ma
-from pyalgotrade.technical import cross
-
-
-import numpy as np
-from scipy.ndimage.interpolation import shift
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
@@ -29,14 +15,14 @@ def main(plot):
     # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    # instrument = "n225"
-    # feed.addBarsFromCSV(instrument, r".\n225.csv")
+    instrument = "n225"
+    feed.addBarsFromCSV(instrument, r".\n225.csv")
 
     # instrument = "hsi"
     # feed.addBarsFromCSV(instrument, r".\hsi.csv")
 
-    instrument = "tsec"
-    feed.addBarsFromCSV(instrument, r".\tsec.csv")
+    #instrument = "tsec"
+    #feed.addBarsFromCSV(instrument, r".\tsec.csv")
 
     # parameters
     hurstPeriod = 100

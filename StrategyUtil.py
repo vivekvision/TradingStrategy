@@ -46,6 +46,9 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
         self.__bollingerBandsNoOfStd = bollingerBandsNoOfStd
         self.__bollingerBands = bollinger.BollingerBands(feed[instrument].getCloseDataSeries(), self.__bollingerBandsPeriod, self.__bollingerBandsNoOfStd)
 
+        self.__longPos = None
+        self.__shortPos = None
+
 
     def getHurst(self):
         return self.__hurst
@@ -59,8 +62,14 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
         self.info("BUY at $%.2f " % (execInfo.getPrice()))
 
     def onExitOk(self, position):
-        execInfo = position.getExitOrder().getExecutionInfo()
-        self.info("SELL at $%.2f " % (execInfo.getPrice()))
+        if self.__longPos == position:
+            execInfo = position.getExitOrder().getExecutionInfo()
+            self.info("SELL-L at $%.2f" % (execInfo.getPrice()))
+            self.__longPos = None
+        elif self.__shortPos == position:
+            execInfo = position.getExitOrder().getExecutionInfo()
+            self.info("SELL-S at $%.2f" % (execInfo.getPrice()))
+            self.__shortPos = None
 
     def sell(self, bars):
         currentPos = abs(self.getBroker().getShares(self.__instrument))
@@ -75,33 +84,79 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
         self.info("Placing buy market order for %s shares" % size)
         self.marketOrder(self.__instrument, size)
 
-    def onBars(self, bars):
+    def isMeanReversionRegimeEnterLongSignal(self, close):
+        return close < self.__bollingerBands.getLowerBand()[-1]
 
+    def isMeanReversionRegimeExitLongSignal(self, close):
+        return close >  self.__bollingerBands.getLowerBand()[-1] and not self.__longPos.exitActive()
+
+    def isMeanReversionRegimeEnterShortSignal(self, close):
+        return close > self.__bollingerBands.getUpperBand()[-1]
+
+    def isMeanReversionRegimeExitShortSignal(self, close):
+        return close < self.__bollingerBands.getUpperBand()[-1] and not self.__shortPos.exitActive()
+
+    def isMomentumRegimeEnterLongSignal(self):
+        return cross.cross_above(self.__macd, self.__macd.getSignal()) > 0
+
+    def isMomentumRegimeExitLongSignal(self):
+        return cross.cross_above(self.__macd, self.__macd.getSignal()) < 0 and not self.__longPos.exitActive()
+
+    def isMomentumRegimeEnterShortSignal(self):
+        return cross.cross_below(self.__macd, self.__macd.getSignal()) > 0
+
+    def isMomentumRegimeExitShortSignal(self):
+        return cross.cross_below(self.__macd, self.__macd.getSignal()) < 0 and not self.__shortPos.exitActive()
+
+
+    def onBars(self, bars):
         if bars.getBar(self.__instrument):
             hurst = self.getHurstValue()
 
             bar = bars[self.__instrument]
-            open = bar.getOpen()
             close = bar.getAdjClose()
-            currentPos = abs(self.getBroker().getShares(self.__instrument))
-
-            lowerBBands = self.__bollingerBands.getLowerBand()[-1]
-            upperBBands = self.__bollingerBands.getUpperBand()[-1]
-
-            macdLine = self.__macd
-            signalLine = self.__macd.getSignal()
 
             if hurst is not None:
                 if hurst < 0.5:
-                    if close < lowerBBands > 0:
-                        self.buy(bars)
+                    if self.__longPos is not None:
+                        if self.isMeanReversionRegimeExitLongSignal(close):
+                            self.__longPos.exitMarket()
+                    elif self.__shortPos is not None:
+                        if self.isMeanReversionRegimeExitShortSignal(close):
+                            self.__shortPos.exitMarket()
 
-                    elif close > upperBBands and currentPos > 0:
-                        self.sell(bars)
+                    if self.isMeanReversionRegimeEnterLongSignal(close):
+                        cash = self.getBroker().getCash() * 0.9
+                        price = bars[self.__instrument].getAdjClose()
+                        size = int(cash / price)
+                        if size > 0:
+                            self.__longPos = self.enterLong(self.__instrument, size, True)
 
-                if hurst >= 0.5:
-                    if cross.cross_above(macdLine, signalLine) > 0:
-                        self.buy(bars)
+                    elif self.isMeanReversionRegimeEnterShortSignal(close):
+                        cash = self.getBroker().getCash() * 0.9
+                        price = bars[self.__instrument].getAdjClose()
+                        size = int(cash / price)
+                        if size > 0:
+                            self.__shortPos = self.enterShort(self.__instrument, size, True)
 
-                    if cross.cross_below(macdLine, signalLine) > 0 and currentPos > 0:
-                        self.sell(bars)
+                if hurst > 0.5:
+                    if self.__longPos is not None:
+                        if self.isMomentumRegimeExitLongSignal():
+                            self.__longPos.exitMarket()
+                    elif self.__shortPos is not None:
+                        if self.isMomentumRegimeExitShortSignal():
+                            self.__shortPos.exitMarket()
+
+                    if self.isMomentumRegimeEnterLongSignal():
+                        cash = self.getBroker().getCash() * 0.9
+                        price = bars[self.__instrument].getAdjClose()
+                        size = int(cash / price)
+                        if size > 0:
+                            self.__longPos = self.enterLong(self.__instrument, size, True)
+
+                    if self.isMomentumRegimeEnterShortSignal():
+                        cash = self.getBroker().getCash() * 0.9
+                        price = bars[self.__instrument].getAdjClose()
+                        size = int(cash / price)
+                        if size > 0:
+                            self.__shortPos = self.enterShort(self.__instrument, size, True)
