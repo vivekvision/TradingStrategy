@@ -15,14 +15,29 @@ def main(plot):
     # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    instrument = "n225"
-    feed.addBarsFromCSV(instrument, r".\n225.csv")
+    # instrument = "n225"
+    # feed.addBarsFromCSV(instrument, r".\n225.csv")
 
     # instrument = "hsi"
     # feed.addBarsFromCSV(instrument, r".\hsi.csv")
 
-    #instrument = "tsec"
-    #feed.addBarsFromCSV(instrument, r".\tsec.csv")
+    # instrument = "hsce"
+    # feed.addBarsFromCSV(instrument, r".\hsce.csv")
+
+    # instrument = "tsec"
+    # feed.addBarsFromCSV(instrument, r".\tsec.csv")
+
+    # instrument = "asx"
+    # feed.addBarsFromCSV(instrument, r".\asx.csv")
+
+    # instrument = "kospi"
+    # feed.addBarsFromCSV(instrument, r".\kospi.csv")
+
+    # instrument = "nifty"
+    # feed.addBarsFromCSV(instrument, r".\nifty.csv")
+
+    instrument = "jkse"
+    feed.addBarsFromCSV(instrument, r".\jkse.csv")
 
     # parameters
     hurstPeriod = 100
