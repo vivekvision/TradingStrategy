@@ -15,29 +15,29 @@ def main(plot):
     # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    instrument = "n225"
-    feed.addBarsFromCSV(instrument, r".\n225.csv")
+    #instrument = "n225"
+    #feed.addBarsFromCSV(instrument, r".\Data\n225.csv")
 
-    # instrument = "hsi"
-    # feed.addBarsFromCSV(instrument, r".\hsi.csv")
+    instrument = "hsi"
+    feed.addBarsFromCSV(instrument, r".\Data\hsi.csv")
 
     # instrument = "hsce"
-    # feed.addBarsFromCSV(instrument, r".\hsce.csv")
+    # feed.addBarsFromCSV(instrument, r".\Data\hsce.csv")
 
     # instrument = "tsec"
-    # feed.addBarsFromCSV(instrument, r".\tsec.csv")
+    # feed.addBarsFromCSV(instrument, r".\Data\tsec.csv")
 
     # instrument = "asx"
-    # feed.addBarsFromCSV(instrument, r".\asx.csv")
+    # feed.addBarsFromCSV(instrument, r".\Data\asx.csv")
 
     # instrument = "kospi"
-    # feed.addBarsFromCSV(instrument, r".\kospi.csv")
+    # feed.addBarsFromCSV(instrument, r".\Data\kospi.csv")
 
     #instrument = "nifty"
-    #feed.addBarsFromCSV(instrument, r".\nifty.csv")
+    #feed.addBarsFromCSV(instrument, r".\Data\nifty.csv")
 
     #instrument = "jkse"
-    #feed.addBarsFromCSV(instrument, r".\jkse.csv")
+    #feed.addBarsFromCSV(instrument, r".\Data\jkse.csv")
 
     # parameters
     hurstPeriod = 100
@@ -45,39 +45,41 @@ def main(plot):
     macdLongerPeriod = 26
     macdSignalPeriod = 9
     rsiPeriod = 2
+
     entrySMAPeriod = 36
     exitSMAPeriod = 6
+
     overBoughtThreshold = 80
     overSoldThreshold = 20
 
-    strat = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, macdShorterPeriod, macdLongerPeriod, macdSignalPeriod, rsiPeriod, entrySMAPeriod, exitSMAPeriod, overBoughtThreshold, overSoldThreshold)
+    strategy = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, macdShorterPeriod, macdLongerPeriod, macdSignalPeriod, rsiPeriod, entrySMAPeriod, exitSMAPeriod, overBoughtThreshold, overSoldThreshold)
 
     #Attach a Sharpe Ratio analyser
     sharpeRatioAnalyzer = sharpe.SharpeRatio()
-    strat.attachAnalyzer(sharpeRatioAnalyzer)
+    strategy.attachAnalyzer(sharpeRatioAnalyzer)
 
     #Attach a Drawdown analyzer
     drawdownAnalyzer = drawdown.DrawDown()
-    strat.attachAnalyzer(drawdownAnalyzer)
+    strategy.attachAnalyzer(drawdownAnalyzer)
 
     # Attach a return analyzer
     returnsAnalyzer = returns.Returns()
-    strat.attachAnalyzer(returnsAnalyzer)
+    strategy.attachAnalyzer(returnsAnalyzer)
 
     # Attach trade analyzer
     tradesAnalyzer = trades.Trades()
-    strat.attachAnalyzer(tradesAnalyzer)
+    strategy.attachAnalyzer(tradesAnalyzer)
 
     if plot:
-        plt = plotter.StrategyPlotter(strat, True, False, True)
-        plt.getOrCreateSubplot("hurst").addDataSeries("Hurst", strat.getHurst())
+        plt = plotter.StrategyPlotter(strategy, True, False, True)
+        plt.getOrCreateSubplot("hurst").addDataSeries("Hurst", strategy.getHurst())
         plt.getOrCreateSubplot("hurst").addLine("Random", 0.5)
 
         # Plot the simple returns on each bar.
         plt.getOrCreateSubplot("returns").addDataSeries("Simple returns", returnsAnalyzer.getReturns())
 
-    strat.run()
-    strat.info("Final portfolio value: $%.2f" % strat.getResult())
+    strategy.run()
+    strategy.info("Final portfolio value: $%.2f" % strategy.getResult())
     print("Sharpe ratio: %.2f" % sharpeRatioAnalyzer.getSharpeRatio(0.05))
     print("Maximum Drawdown : %.2f" % drawdownAnalyzer.getMaxDrawDown())
     print("Longest Drawdown Duration : %s" % drawdownAnalyzer.getLongestDrawDownDuration())
