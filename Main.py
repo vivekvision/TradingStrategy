@@ -15,8 +15,8 @@ def main(plot):
     # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    # instrument = "n225"
-    # feed.addBarsFromCSV(instrument, r".\n225.csv")
+    instrument = "n225"
+    feed.addBarsFromCSV(instrument, r".\n225.csv")
 
     # instrument = "hsi"
     # feed.addBarsFromCSV(instrument, r".\hsi.csv")
@@ -33,21 +33,24 @@ def main(plot):
     # instrument = "kospi"
     # feed.addBarsFromCSV(instrument, r".\kospi.csv")
 
-    # instrument = "nifty"
-    # feed.addBarsFromCSV(instrument, r".\nifty.csv")
+    #instrument = "nifty"
+    #feed.addBarsFromCSV(instrument, r".\nifty.csv")
 
-    instrument = "jkse"
-    feed.addBarsFromCSV(instrument, r".\jkse.csv")
+    #instrument = "jkse"
+    #feed.addBarsFromCSV(instrument, r".\jkse.csv")
 
     # parameters
     hurstPeriod = 100
     macdShorterPeriod = 12
-    macdLongerPeriod = 16
+    macdLongerPeriod = 26
     macdSignalPeriod = 9
-    bollingerBandsPeriod = 30
-    bollingerBandsNoOfStd = 2
+    rsiPeriod = 2
+    entrySMAPeriod = 36
+    exitSMAPeriod = 6
+    overBoughtThreshold = 80
+    overSoldThreshold = 20
 
-    strat = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, macdShorterPeriod, macdLongerPeriod, macdSignalPeriod, bollingerBandsPeriod, bollingerBandsNoOfStd)
+    strat = StrategyUtil.ComprehensiveStrategy(feed, instrument, hurstPeriod, macdShorterPeriod, macdLongerPeriod, macdSignalPeriod, rsiPeriod, entrySMAPeriod, exitSMAPeriod, overBoughtThreshold, overSoldThreshold)
 
     #Attach a Sharpe Ratio analyser
     sharpeRatioAnalyzer = sharpe.SharpeRatio()
