@@ -15,11 +15,11 @@ def main(plot):
     # Load  bar feed from CSV file/Yahoo format
     feed = yahoofeed.Feed()
 
-    #instrument = "n225"
-    #feed.addBarsFromCSV(instrument, r".\Data\n225.csv")
+    instrument = "n225"
+    feed.addBarsFromCSV(instrument, r".\Data\n225.csv")
 
-    instrument = "hsi"
-    feed.addBarsFromCSV(instrument, r".\Data\hsi.csv")
+    #instrument = "hsi"
+    #feed.addBarsFromCSV(instrument, r".\Data\hsi.csv")
 
     # instrument = "hsce"
     # feed.addBarsFromCSV(instrument, r".\Data\hsce.csv")
@@ -41,14 +41,14 @@ def main(plot):
 
     # parameters
     hurstPeriod = 100
+
     macdShorterPeriod = 12
-    macdLongerPeriod = 26
+    macdLongerPeriod = 36
     macdSignalPeriod = 9
+
+    entrySMAPeriod = 65
+    exitSMAPeriod = 4
     rsiPeriod = 2
-
-    entrySMAPeriod = 36
-    exitSMAPeriod = 6
-
     overBoughtThreshold = 80
     overSoldThreshold = 20
 

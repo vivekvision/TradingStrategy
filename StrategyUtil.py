@@ -1,25 +1,13 @@
 from pyalgotrade import strategy
-from pyalgotrade.technical import hurst
-from pyalgotrade.barfeed import quandlfeed
-from pyalgotrade import plotter
-from pyalgotrade.stratanalyzer import sharpe
-from pyalgotrade.stratanalyzer import returns
-from pyalgotrade.barfeed import yahoofeed
-from pyalgotrade import dataseries
-from pyalgotrade.dataseries import aligned
 
-from pyalgotrade import eventprofiler
-from pyalgotrade.technical import stats
-from pyalgotrade.technical import roc
 from pyalgotrade.technical import rsi
 from pyalgotrade.technical import ma
 from pyalgotrade.technical import cross
 
-from pyalgotrade.technical import bollinger
 from pyalgotrade.technical import macd
 
-import numpy as np
-from scipy.ndimage.interpolation import shift
+import MovingHurst
+
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
@@ -32,20 +20,23 @@ class ComprehensiveStrategy(strategy.BacktestingStrategy):
         self.__instrument = instrument
         self.__hurstPeriod = hurstPeriod
 
-        self.__macdShorterPeriod = macdShorterPeriod
-        self.__macdLongerPeriod = macdLongerPeriod
-        self.__macdSignalPeriod = macdSignalPeriod
-        self.__macd = macd.MACD(feed[instrument].getCloseDataSeries(), self.__macdShorterPeriod, self.__macdLongerPeriod, self.__macdSignalPeriod)
-
         # Use adjusted close values, if available, instead of regular close values.
         if feed.barsHaveAdjClose():
             self.setUseAdjustedValues(True)
         self.__priceDS = feed[instrument].getPriceDataSeries()
-        self.__hurst = hurst.HurstExponent(self.__priceDS, hurstPeriod)
+        self.__adjClose = feed[instrument].getAdjCloseDataSeries()
 
-        self.__entrySMA = ma.SMA(self.__priceDS, entrySMAPeriod)
-        self.__exitSMA = ma.SMA(self.__priceDS, exitSMAPeriod)
-        self.__rsi = rsi.RSI(self.__priceDS, rsiPeriod)
+        self.__macdShorterPeriod = macdShorterPeriod
+        self.__macdLongerPeriod = macdLongerPeriod
+        self.__macdSignalPeriod = macdSignalPeriod
+        self.__macd = macd.MACD(self.__adjClose, self.__macdShorterPeriod, self.__macdLongerPeriod, self.__macdSignalPeriod)
+
+        self.__hurst = MovingHurst.HurstExponent(self.__adjClose, hurstPeriod)
+
+        self.__entrySMA = ma.EMA(self.__priceDS, entrySMAPeriod)
+        self.__exitSMA = ma.EMA(self.__priceDS, exitSMAPeriod)
+
+        self.__rsi = rsi.RSI(self.__adjClose, rsiPeriod)
         self.__overBoughtThreshold = overBoughtThreshold
         self.__overSoldThreshold = overSoldThreshold
 
